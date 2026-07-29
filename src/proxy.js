@@ -1,16 +1,18 @@
-const request = require('request')
-const pick = require('lodash').pick
-const shouldCompress = require('./shouldCompress')
-const redirect = require('./redirect')
-const compress = require('./compress')
-const bypass = require('./bypass')
-const copyHeaders = require('./copyHeaders')
+const request = require('request');
+const pick = require('lodash').pick;
+const shouldCompress = require('./shouldCompress');
+const redirect = require('./redirect');
+const compress = require('./compress');
+const bypass = require('./bypass');
+const copyHeaders = require('./copyHeaders');
 
 function proxy(req, res) {
-  // console.log('req', req)
+  // console.log('req', req);
+  
+  const req_params_url = req.params.url;
   
   request.get(
-    req.params.url,
+    req_params_url.replace("https://", "http://"),
     {
       /*headers: {
         ...pick(req.headers, ['cookie', 'dnt', 'referer']),
@@ -29,20 +31,20 @@ function proxy(req, res) {
       jar: true
     },
     (err, origin, buffer) => {
-      if (err || origin.statusCode >= 400) return redirect(req, res)
+      if (err || origin.statusCode >= 400) return redirect(req, res);
 
-      copyHeaders(origin, res)
-      res.setHeader('content-encoding', 'identity')
-      req.params.originType = origin.headers['content-type'] || ''
-      req.params.originSize = buffer.length
+      copyHeaders(origin, res);
+      res.setHeader('content-encoding', 'identity');
+      req.params.originType = origin.headers['content-type'] || '';
+      req.params.originSize = buffer.length;
 
       if (shouldCompress(req)) {
-        compress(req, res, buffer)
+        compress(req, res, buffer);
       } else {
-        bypass(req, res, buffer)
+        bypass(req, res, buffer);
       }
     }
-  )
+  );
 }
 
-module.exports = proxy
+module.exports = proxy;

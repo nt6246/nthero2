@@ -1,5 +1,5 @@
-const sharp = require('sharp')
-const redirect = require('./redirect')
+const sharp = require('sharp');
+const redirect = require('./redirect');
 
 function getfilename(url) {
   try {
@@ -10,11 +10,11 @@ function getfilename(url) {
 }
 
 function compress(req, res, input) {
-  // console.log(req.params.url)
+  // console.log(req.params.url);
   
-  // const format = req.params.webp ? 'webp' : 'jpeg'
-  const format = req.params.avif ? 'avif' : 'webp'
-  // const format = req.params.webp ? 'webp' : 'avif'
+  // const format = req.params.webp ? 'webp' : 'jpeg';
+  const format = req.params.avif ? 'avif' : 'webp';
+  // const format = req.params.webp ? 'webp' : 'avif';
 
   sharp(input)
     // .grayscale(req.params.grayscale)
@@ -27,19 +27,19 @@ function compress(req, res, input) {
       quality: req.params.quality
     })
     .toBuffer((err, output, info) => {
-      if (err || !info || res.headersSent) return redirect(req, res)
+      if (err || !info || res.headersSent) return redirect(req, res);
 
-      const filename = getfilename(req.params.url)
+      const filename = getfilename(req.params.url);
 
-      res.setHeader('content-type', `image/${format}`)
-      res.setHeader('content-length', info.size)
-      res.setHeader('content-disposition', `attachment; filename="${filename}.${format}"`)
-      res.setHeader('x-original-size', req.params.originSize)
-      res.setHeader('x-bytes-saved', req.params.originSize - info.size)
-      res.status(200)
-      res.write(output)
-      res.end()
-    })
+      res.setHeader('content-type', `image/${format}`);
+      res.setHeader('content-length', info.size);
+      res.setHeader('content-disposition', `attachment; filename="${filename}.${format}"`);
+      res.setHeader('x-original-size', req.params.originSize);
+      res.setHeader('x-bytes-saved', req.params.originSize - info.size);
+      res.status(200);
+      res.write(output);
+      res.end();
+    });
 }
 
-module.exports = compress
+module.exports = compress;

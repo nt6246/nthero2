@@ -1,14 +1,14 @@
 function redirect(req, res) {
-  if (res.headersSent) return
+  if (res.headersSent) return;
 
-  // res.setHeader('content-length', 0)
-  res.removeHeader('cache-control')
-  res.removeHeader('expires')
-  res.removeHeader('date')
-  res.removeHeader('etag')
-  // res.setHeader('location', encodeURI(req.params.url))
-  // res.status(302).end()
-  res.status(404).end()
+  // res.setHeader('content-length', 0);
+  res.removeHeader('cache-control');
+  res.removeHeader('expires');
+  res.removeHeader('date');
+  res.removeHeader('etag');
+  // res.setHeader('location', encodeURI(req.params.url));
+  // res.status(302).end();
+  res.status(404).end();
 }
 
-module.exports = redirect
+module.exports = redirect;
