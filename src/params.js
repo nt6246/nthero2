@@ -1,8 +1,6 @@
 const DEFAULT_QUALITY = 40;
 
 function params(req, res, next) {
-  console.log('req.query.url', req.query.url);
-
   let url = req.query.url;
   if (Array.isArray(url)) url = url.join('&url=');
   if (!url) return res.end('bandwidth-hero-proxy');
