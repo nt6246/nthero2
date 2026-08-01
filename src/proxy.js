@@ -1,4 +1,4 @@
-const request = require('request');
+const axios = require('axios');
 const pick = require('lodash').pick;
 const shouldCompress = require('./shouldCompress');
 const redirect = require('./redirect');
@@ -6,45 +6,72 @@ const compress = require('./compress');
 const bypass = require('./bypass');
 const copyHeaders = require('./copyHeaders');
 
-function proxy(req, res) {
-  // console.log('req', req);
+async function fetchWithHttpsFallback(url, config = {}) {
+  try {
+    const response = await axios.get(url, config);
+    return response;
   
-  const req_params_url = req.params.url;
-  
-  request.get(
-    req_params_url.replace("https://", "http://"),
+  } catch (error) {
+    // console.warn(`HTTPS request failed: ${error.message}. Trying HTTP...`);
+
+    if (!error.response) {
+      return redirect(req, res);
+
+    } else {
+      // if (error.response.status == 404) {}
+
+      const isHttp = /^http:\/\//;
+      const isHttps = /^https:\/\//;
+      let url2 = url;
+
+      if (isHttp.test(url)) {
+        // console.log(url.replace(/^http:\/\//, 'https://'));
+        url2 = url.replace(/^http:\/\//, 'https://');
+      }
+      else if (isHttps.test(url)) {
+        // console.log(url.replace(/^https:\/\//, 'http://'));
+        url2 = url.replace(/^https:\/\//, 'http://');
+      }
+
+      try {
+        const response = await axios.get(url2, config);
+        return response;
+      
+      } catch (error2) {
+        // console.error(`HTTP fallback also failed: ${error2.message}`);
+        // throw new Error('Both HTTPS and HTTP requests failed.');
+        return redirect(req, res);
+      }
+    }
+  }
+}
+
+async function proxy(req, res) {
+  try {
+    const response = await fetchWithHttpsFallback(req.params.url,
     {
-      /*headers: {
-        ...pick(req.headers, ['cookie', 'dnt', 'referer']),
-        'user-agent': 'Bandwidth-Hero Compressor',
-        'x-forwarded-for': req.headers['x-forwarded-for'] || req.ip,
-        via: '1.1 bandwidth-hero'
-      },*/
       headers: {...pick(req.headers, ['user-agent', 'cookie', 'dnt', 'referer'])},
       // timeout: 10000,
       timeout: 50000,
       // maxRedirects: 5,
-      maxRedirects: 3,
-      encoding: null,
-      strictSSL: false,
-      gzip: true,
-      jar: true
-    },
-    (err, origin, buffer) => {
-      if (err || origin.statusCode >= 400) return redirect(req, res);
+      responseType: 'arraybuffer',
+      maxRedirects: 3
+    });
 
-      copyHeaders(origin, res);
-      res.setHeader('content-encoding', 'identity');
-      req.params.originType = origin.headers['content-type'] || '';
-      req.params.originSize = buffer.length;
+    copyHeaders(response, res);
+    res.setHeader('content-encoding', 'identity');
+    req.params.originType = response.headers['content-type'] || '';
+    req.params.originSize = response.data.length;
 
-      if (shouldCompress(req)) {
-        compress(req, res, buffer);
-      } else {
-        bypass(req, res, buffer);
-      }
+    if (shouldCompress(req)) {
+      compress(req, res, response.data);
+    } else {
+      bypass(req, res, response.data);
     }
-  );
+  } catch (error) {
+    // console.error('Error:', error.message);
+    return redirect(req, res);
+  }
 }
 
 module.exports = proxy;

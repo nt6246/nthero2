@@ -12,9 +12,7 @@ function getfilename(url) {
 function compress(req, res, input) {
   // console.log(req.params.url);
   
-  // const format = req.params.webp ? 'webp' : 'jpeg';
-  // const format = req.params.avif ? 'avif' : 'webp';
-  const format = req.params.webp ? 'webp' : 'avif';
+  const format = req.params.webp ? 'webp' : 'jpeg';
 
   sharp(input)
     // .grayscale(req.params.grayscale)

@@ -10,10 +10,10 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "axios": "latest",
     "basic-auth": "latest",
     "express": "latest",
     "lodash": "latest",
-    "request": "latest",
     "sharp": "latest"
   }
 }
