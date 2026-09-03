@@ -8,41 +8,21 @@ const copyHeaders = require('./copyHeaders');
 
 async function fetchWithHttpsFallback(url, config = {}) {
   try {
-    const response = await axios.get(url, config);
-    return response;
-  
+    return await axios.get(url, config);
   } catch (error) {
-    // console.warn(`HTTPS request failed: ${error.message}. Trying HTTP...`);
+    if (!error.response) throw error;
 
-    if (!error.response) {
-      return redirect(req, res);
+    const isHttp = /^http:\/\//;
+    const isHttps = /^https:\/\//;
+    let url2 = url;
 
-    } else {
-      // if (error.response.status == 404) {}
-
-      const isHttp = /^http:\/\//;
-      const isHttps = /^https:\/\//;
-      let url2 = url;
-
-      if (isHttp.test(url)) {
-        // console.log(url.replace(/^http:\/\//, 'https://'));
-        url2 = url.replace(/^http:\/\//, 'https://');
-      }
-      else if (isHttps.test(url)) {
-        // console.log(url.replace(/^https:\/\//, 'http://'));
-        url2 = url.replace(/^https:\/\//, 'http://');
-      }
-
-      try {
-        const response = await axios.get(url2, config);
-        return response;
-      
-      } catch (error2) {
-        // console.error(`HTTP fallback also failed: ${error2.message}`);
-        // throw new Error('Both HTTPS and HTTP requests failed.');
-        return redirect(req, res);
-      }
+    if (isHttp.test(url)) {
+      url2 = url.replace(/^http:\/\//, 'https://');
+    } else if (isHttps.test(url)) {
+      url2 = url.replace(/^https:\/\//, 'http://');
     }
+
+    return await axios.get(url2, config);
   }
 }
 
