@@ -1,7 +1,7 @@
 'use strict';
 const app = require('express')();
 
-const bolt = require("./bolt");
+const bolt = require('./bolt');
 require('dotenv').config();
 
 // const authenticate = require('./src/authenticate');
