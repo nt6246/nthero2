@@ -1,5 +1,9 @@
 'use strict';
 const app = require('express')();
+
+const bolt = require("./bolt");
+require('dotenv').config()
+
 // const authenticate = require('./src/authenticate');
 const params = require('./src/params');
 const proxy = require('./src/proxy');
