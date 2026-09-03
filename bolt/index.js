@@ -1,4 +1,4 @@
-const { App } = require('@slack/bolt')
+const { App } = require('@slack/bolt');
 const receiver = require("./receiver");
 const handlers = require("./handlers");
 
