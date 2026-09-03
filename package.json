@@ -11,6 +11,7 @@
     "start": "node server.js"
   },
   "dependencies": {
+    "@slack/bolt": "^5.1.0",
     "axios": "latest",
     "basic-auth": "latest",
     "express": "latest",
